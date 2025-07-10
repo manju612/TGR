@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tech for Girls Registration</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input, button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #ff85c1;
+    }
+
+    #statusMessage {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Tech for Girls Registration</h2>
+
+    <form id="registrationForm">
+      <input type="text" id="name" placeholder="Name" required>
+      <input type="number" id="phone" placeholder="Phone Number" required>
+      <input type="email" id="email" placeholder="Email ID" required>
+      <input type="text" id="college" placeholder="College/Department" required>
+
+      <button type="button" id="whatsappBtn">Share on WhatsApp</button>
+      <p id="counter">Click count: 0/5</p>
+
+      <input type="file" id="screenshot" accept="image/*" required>
+
+      <button type="submit" id="submitBtn" disabled>Submit Registration</button>
+    </form>
+
+    <p id="statusMessage"></p>
+  </div>
+
+  <script>
+    // Clear localStorage when testing (remove this line after testing)
+    localStorage.removeItem("submitted");
+
+    let counter = 0;
+    const maxCount = 5;
+
+    const whatsappBtn = document.getElementById("whatsappBtn");
+    const counterText = document.getElementById("counter");
+    const submitBtn = document.getElementById("submitBtn");
+    const form = document.getElementById("registrationForm");
+    const statusMessage = document.getElementById("statusMessage");
+
+    // Check localStorage
+    if (localStorage.getItem("submitted") === "true") {
+      disableForm();
+      statusMessage.textContent = "🎉 Your submission has been recorded. Thanks for being part of Tech for Girls!";
+    }
+
+    whatsappBtn.addEventListener("click", () => {
+      if (counter < maxCount) {
+        counter++;
+        counterText.textContent = `Click count: ${counter}/${maxCount}`;
+
+        const message = encodeURIComponent("Hey Buddy, Join Tech For Girls Community!");
+        const whatsappUrl = `https://wa.me/?text=${message}`;
+        window.open(whatsappUrl, "_blank");
+
+        if (counter === maxCount) {
+          alert("Sharing complete. Please continue.");
+          submitBtn.disabled = false;
+        }
+      }
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      if (counter < maxCount) {
+        alert("Please complete WhatsApp sharing first!");
+        return;
+      }
+
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const email = document.getElementById("email").value;
+      const college = document.getElementById("college").value;
+      const screenshotFile = document.getElementById("screenshot").files[0];
+
+      if (!name || !phone || !email || !college || !screenshotFile) {
+        alert("Please fill all fields and upload screenshot!");
+        return;
+      }
+
+      // Prepare form data
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("phone", phone);
+      formData.append("email", email);
+      formData.append("college", college);
+      formData.append("screenshot", screenshotFile);
+
+      // TODO: Replace with your Google Apps Script URL
+      fetch("https://script.google.com/macros/s/AKfycbwaikwD1stbnmSK7_xpD1SzCSlEUFwVxU0OBcEOnl-3NRG2vj9DTHmJpiLTpU6knIsTzQ/exec", {
+        method: "POST",
+        body: formData,
+      })
+      .then(res => res.text())
+      .then(data => {
+        statusMessage.textContent = "🎉 Your submission has been recorded. Thanks for being part of Tech for Girls!";
+        localStorage.setItem("submitted", "true");
+        disableForm();
+      })
+      .catch(err => {
+        alert("Error submitting form: " + err);
+      });
+    });
+
+    function disableForm() {
+      document.querySelectorAll("input, button").forEach(el => el.disabled = true);
+    }
+  </script>
+</body>
+</html>
